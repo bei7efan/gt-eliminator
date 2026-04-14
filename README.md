@@ -1,15 +1,15 @@
 # GT-Eliminator 🏆
 
-GT-Eliminator 是一个基于 Vue 3 的锦标赛 bracket 组件，支持单淘汰赛和大逃杀模式（每场比赛3+支队伍）。
+GT-Eliminator 是一个基于 Vue 3 的锦标赛 bracket 组件，支持单淘汰赛模式。
 
 ## ✨ 特性
 
-- **大逃杀模式**：当任何比赛包含超过两支队伍时，自动切换到列表视图
+- **单淘汰赛模式**：支持经典的1v1单淘汰赛结构
 - **轮次标题控制**：轻松自定义轮次标题的颜色、边框和最小宽度
-- **可定制的列表视图**：通过 props 调整标签、表头和边框颜色
-- **响应式设计**：适用于各种屏幕尺寸，大逃杀列表为全宽
+- **可定制的比赛信息显示**：通过 props 调整比赛信息区域的样式
+- **响应式设计**：适用于各种屏幕尺寸
 - **获胜者/失败者状态**：内置可视化状态，可通过自定义类扩展
-- **灵活的数据结构**：支持基于轮次或扁平树的输入
+- **灵活的数据结构**：支持基于轮次的输入，包含丰富的比赛信息
 
 ## 🚀 安装
 
@@ -24,7 +24,16 @@ import Bracket from "@/components/gt-eliminator/Bracket.vue";
 <template>
   <Bracket :rounds="rounds">
     <template #team="{ team }">
-      {{ team.name }}
+      <div class="team-name">
+        {{ team.name }}
+      </div>
+    </template>
+    <template #match-info="{ match }">
+      <div class="match-info">
+        <div v-if="match.time" class="match-time">{{ match.time }}</div>
+        <div v-if="match.venue" class="match-venue">{{ match.venue }}</div>
+        <div v-if="match.matchId" class="match-id">Match {{ match.matchId }}</div>
+      </div>
     </template>
   </Bracket>
 </template>
@@ -35,14 +44,60 @@ import Bracket from "@/components/gt-eliminator/Bracket.vue";
 const rounds = [
   {
     matches: [
-      {
-        team1: { id: '1', name: 'Team A', winner: true },
-        team2: { id: '2', name: 'Team B', winner: false }
+      { 
+        team1: { id: '1', name: '中国队', winner: false }, 
+        team2: { id: '16', name: '日本队', winner: true }, 
+        time: '2023-06-01', 
+        venue: '北京工人体育场', 
+        matchId: '1', 
+        round: '1/8强赛' 
+      },
+      { 
+        team1: { id: '8', name: '韩国队', winner: false }, 
+        team2: { id: '9', name: '巴西队', winner: true }, 
+        time: '2023-06-01', 
+        venue: '上海体育场', 
+        matchId: '2', 
+        round: '1/8强赛' 
+      }
+    ]
+  },
+  {
+    matches: [
+      { 
+        team1: { id: '16', name: '', winner: false }, 
+        team2: { id: '9', name: '', winner: true }, 
+        time: '2023-06-07', 
+        venue: '北京工人体育场', 
+        matchId: '9', 
+        round: '1/4强赛' 
       }
     ]
   }
 ];
 </script>
+```
+
+### Match 对象结构说明
+
+每个 match 对象包含以下字段：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `team1` | Object | 第一支队伍信息，包含 `id`、`name`、`winner` 等 |
+| `team2` | Object | 第二支队伍信息，包含 `id`、`name`、`winner` 等 |
+| `time` | String | （可选）比赛时间，显示在比赛信息区域 |
+| `venue` | String | （可选）比赛场地，显示在比赛信息区域 |
+| `matchId` | String | （可选）比赛编号，显示在比赛信息区域 |
+| `round` | String | （可选）轮次名称，显示在轮次标题中 |
+
+**队伍对象结构：**
+```javascript
+{
+  id: '1',           // 队伍唯一标识
+  name: '中国队',    // 队伍名称
+  winner: false      // 是否获胜，true表示该队伍获胜
+}
 ```
 
 ## 🎨 使用 Props 进行样式定制（无主题）
@@ -106,32 +161,6 @@ const rounds = [
 | `scrollbarColor` | String | `#cbd5e1` | 滚动条主颜色 |
 | `scrollbarTrackColor` | String | `#f1f5f9` | 滚动条轨道背景 |
 
-### 大逃杀模式 – 标签（轮次/比赛）
-
-| Prop | 类型 | 默认值 |
-|------|------|---------|
-| `brTabBg` | String | `#1A1A1A` |
-| `brTabTextColor` | String | `#ffffff` |
-| `brTabActiveBg` | String | `#8200DB` |
-| `brTabActiveTextColor` | String | `#ffffff` |
-
-### 大逃杀模式 – 表头
-
-| Prop | 类型 | 默认值 |
-|------|------|---------|
-| `brTableHeadBg` | String | `#1C1C1C` |
-| `brTableHeadTextColor` | String | `#ffffff` |
-
-### 大逃杀模式 – 队伍列表
-
-| Prop | 类型 | 默认值 | 控制内容 |
-|------|------|---------|------------------|
-| `brListBg` | String | `#000000` | 列表背景 |
-| `brListTextColor` | String | `#ffffff` | 列表文本颜色 |
-| `brListRowBg` | String | `''` | 单个行背景（默认为 brListBg） |
-| `brListRowHoverBg` | String | `''` | 行悬停背景（默认为 #2A2A2A） |
-| `brRowDividerColor` | String | `#1C1C1C` | 行分隔线 |
-
 ### 插槽
 
 - `#team`：自定义队伍行的渲染。
@@ -158,7 +187,7 @@ const rounds = [
 
 | Prop | 类型 | 默认值 | 说明 |
 |------|------|---------|------|
-| `rounds` | Array | `[]` | 主要输入（支持带有 `team1`/`team2` 的经典 `matches`，或大逃杀模式的 `teams` 数组） |
+| `rounds` | Array | `[]` | 主要输入（支持带有 `team1`/`team2` 的经典 `matches`） |
 | `flatTree` | Array | `[]` | 替代输入格式（扁平树） |
 | `wrapperClass` | String | `''` | 根包装器上的额外类 |
 | `wrapperStyle` | Object | `{}` | 根包装器的内联样式 |
@@ -206,7 +235,7 @@ const rounds = [
 
 ### 数据结构
 
-经典 1v1
+单淘汰赛模式
 ```js
 [
   {
@@ -214,25 +243,10 @@ const rounds = [
       {
         team1: { id: '1', name: 'Team A', winner: true },
         team2: { id: '2', name: 'Team B', winner: false },
+        time: '2023-06-01',
+        venue: '北京工人体育场',
+        matchId: '1',
         round: '1/4决赛' // 可选：轮次名称，会显示在轮次标题中
-      }
-    ]
-  }
-]
-```
-
-大逃杀模式（3+队伍）
-```js
-[
-  {
-    name: '小组赛',
-    matches: [
-      {
-        teams: [
-          { id: 't1', name: 'Team 1', points: 10 },
-          { id: 't2', name: 'Team 2', points: 14 },
-          { id: 't3', name: 'Team 3', points: 9 }
-        ]
       }
     ]
   }
@@ -247,57 +261,14 @@ type Team = {
   name: string
   // 可选字段
   winner?: boolean        // 当队伍赢得比赛时为 true
-  points?: number         // 在大逃杀列表中显示的数字点数（在经典模式中也支持）
+  points?: number         // 可选的分数或点数
 };
 ```
 
 注意：
-- 在经典（1v1）模式中，如果你想在自定义队伍插槽中显示点数，请将可选的 `points` 放在 `team1`/`team2` 上。
-- 在大逃杀模式中，`points` 默认显示在右列。
+- 在单淘汰赛模式中，如果你想在自定义队伍插槽中显示点数，请将可选的 `points` 放在 `team1`/`team2` 上。
 
-### 大逃杀模式
-
-当任何轮次中的任何比赛使用 `teams` 数组包含超过两支队伍时，大逃杀模式会自动启用。UI 会切换到带有可滚动轮次和比赛按钮的列表视图。
-
-#### 数据格式（大逃杀）
-
-```js
-const rounds = [
-  {
-    name: '小组赛',
-    matches: [
-      {
-        teams: [
-          { id: 'g1-1', name: 'Team 1', points: 10 },
-          { id: 'g1-2', name: 'Team 2', points: 14 },
-          { id: 'g1-3', name: 'Team 3', points: 9 }
-        ]
-      }
-    ]
-  }
-];
-```
-
-#### 插槽（大逃杀）
-
-- `#team`：自定义队伍行的渲染。
-
-```vue
-<template #team="{ team }">
-  {{ team.name }}
-  <!-- 你可以包含徽章、徽标等 -->
-  <span v-if="team.points">{{ team.points }}</span>
-</template>
-```
-
-#### 可定制的 props（轮次标题和大逃杀）
-
-- 轮次标题：`roundTitleColor`、`roundTitleBgColor`、`roundTitleBorderColor`
-- 大逃杀标签：`brTabBg`、`brTabTextColor`、`brTabActiveBg`、`brTabActiveTextColor`
-- 大逃杀表头：`brTableHeadBg`、`brTableHeadTextColor`
-- 大逃杀队伍列表：`brListBg`、`brListTextColor`、`brListRowBg`、`brListRowHoverBg`、`brRowDividerColor`
-
-使用示例：
+### 完整使用示例
 
 ```vue
 <template>
@@ -308,17 +279,15 @@ const rounds = [
     :round-title-border-color="'#1e293b'"
     :winner-team-hover="'rgba(255, 255, 255, 0.1)'"
     :defeated-team-hover="'rgba(255, 0, 0, 0.1)'"
-    :br-tab-bg="'#111827'"
-    :br-tab-text-color="'#e5e7eb'"
-    :br-tab-active-bg="'#374151'"
-    :br-tab-active-text-color="'#ffffff'"
-    :br-table-head-bg="'#111827'"
-    :br-table-head-text-color="'#9ca3af'"
-    :br-list-row-bg="'#1f2937'"
-    :br-list-row-hover-bg="'#374151'"
-    :br-row-divider-color="'#374151'"
   >
     <template #team="{ team }">{{ team.name }}</template>
+    <template #match-info="{ match }">
+      <div class="match-info">
+        <div v-if="match.time">{{ match.time }}</div>
+        <div v-if="match.venue">{{ match.venue }}</div>
+        <div v-if="match.matchId">Match {{ match.matchId }}</div>
+      </div>
+    </template>
   </Bracket>
 </template>
 ```
